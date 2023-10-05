@@ -20,6 +20,13 @@ const generarJWT = (uid = '') => {
     });
 }
 
+// Parse - JWT - Obtener Payload y fecha de creación y expiración
+function parseJwt(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace('-', '+').replace('_', '/');
+    return JSON.parse(window.atob(base64));
+};
+
 module.exports = {
     generarJWT
 }
