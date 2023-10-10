@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const request = require('request');
 
 const cloudinary = require('cloudinary').v2;
 cloudinary.config(process.env.CLOUDINARY_URL);
@@ -162,9 +163,49 @@ const mostrarImagen = async (req, res = response) => {
     res.sendFile(noImagePath);
 }
 
+const mostrarImagenUrl = async (req, res = response) => {
+
+    const { id, coleccion } = req.params;
+
+    let modelo;
+
+    switch (coleccion) {
+        case 'usuarios':
+            modelo = await Usuario.findById(id);
+            if (!modelo) {
+                return res.status(400).json({
+                    msg: `No existe un usuario con el id ${id}`
+                });
+            }
+
+            break;
+
+        case 'productos':
+            modelo = await Producto.findById(id);
+            if (!modelo) {
+                return res.status(400).json({
+                    msg: `No existe un producto con el id ${id}`
+                });
+            }
+
+            break;
+
+        default:
+            return res.status(500).json({ msg: 'Se me olcidó validar esto' });
+    }
+
+    if (modelo.img) {
+        return request(modelo.img).pipe(res);
+    }
+
+    const noImagePath = path.join(__dirname, '../assets/no-image.jpg');
+    res.sendFile(noImagePath);
+}
+
 module.exports = {
     cargarArchivo,
     actualizarImagen,
     actualizarImagenCloudinary,
-    mostrarImagen
+    mostrarImagen,
+    mostrarImagenUrl
 }
